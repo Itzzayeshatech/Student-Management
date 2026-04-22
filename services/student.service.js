@@ -1,55 +1,71 @@
 const Student = require('../models/student.model');
 const ApiError = require('../utils/ApiError');
-
-let students = []; // in-memory DB
+const mongoose = require('mongoose');
 
 // CREATE
 exports.createStudent = async (data) => {
-  const student = new Student({
-    id: Date.now().toString(),
-    ...data
-  });
-
-  students.push(student);
-  return student;
+  return await Student.create(data);
 };
 
-// GET ALL (with pagination & search)
+// GET ALL (pagination + search)
 exports.getAllStudents = async ({ page = 1, limit = 10, search = '' }) => {
-  let filtered = students.filter(s =>
-    s.name.toLowerCase().includes(search.toLowerCase())
-  );
+  const query = {
+    name: { $regex: search, $options: 'i' }
+  };
 
-  const start = (page - 1) * limit;
-  const end = start + Number(limit);
+  const skip = (page - 1) * limit;
+
+  const students = await Student.find(query)
+    .skip(skip)
+    .limit(Number(limit));
+
+  const total = await Student.countDocuments(query);
 
   return {
-    total: filtered.length,
-    data: filtered.slice(start, end)
+    total,
+    page: Number(page),
+    limit: Number(limit),
+    data: students
   };
 };
 
 // GET BY ID
 exports.getStudentById = async (id) => {
-  const student = students.find(s => s.id === id);
+  if (!mongoose.Types.ObjectId.isValid(id)) {
+    throw new ApiError(400, 'Invalid ID format');
+  }
+
+  const student = await Student.findById(id);
   if (!student) throw new ApiError(404, 'Student not found');
+
   return student;
 };
 
 // UPDATE
 exports.updateStudent = async (id, data) => {
-  const index = students.findIndex(s => s.id === id);
-  if (index === -1) throw new ApiError(404, 'Student not found');
+  if (!mongoose.Types.ObjectId.isValid(id)) {
+    throw new ApiError(400, 'Invalid ID format');
+  }
 
-  students[index] = { ...students[index], ...data };
-  return students[index];
+  const student = await Student.findByIdAndUpdate(id, data, {
+    new: true,
+    runValidators: true
+  });
+
+  if (!student) throw new ApiError(404, 'Student not found');
+
+  return student;
 };
 
 // DELETE
 exports.deleteStudent = async (id) => {
-  const index = students.findIndex(s => s.id === id);
-  if (index === -1) throw new ApiError(404, 'Student not found');
+  if (!mongoose.Types.ObjectId.isValid(id)) {
+    throw new ApiError(400, 'Invalid ID format');
+  }
 
-  const deleted = students.splice(index, 1);
-  return deleted[0];
+  const student = await Student.findByIdAndDelete(id);
+
+  if (!student) throw new ApiError(404, 'Student not found');
+
+  return student;
 };
