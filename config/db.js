@@ -19,7 +19,13 @@ const connectDB = async () => {
   }
 
   try {
-    const conn = await mongoose.connect(uri);
+    const conn = await mongoose.connect(uri, {
+      maxPoolSize: 10, // Maintain up to 10 socket connections
+      serverSelectionTimeoutMS: 5000, // How long to try selecting a server
+      socketTimeoutMS: 45000, // How long a send or receive on a socket can take
+      bufferMaxEntries: 0, // Disable mongoose buffering
+      bufferCommands: false, // Disable mongoose buffering
+    });
     console.log(`✅ MongoDB Connected: ${conn.connection.host}`);
   } catch (error) {
     console.error('❌ Database connection failed:', error.message);
@@ -28,4 +34,3 @@ const connectDB = async () => {
 };
 
 module.exports = connectDB;
-

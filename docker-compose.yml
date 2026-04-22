@@ -1,0 +1,144 @@
+version: '3.8'
+
+# ==========================================
+# Student Management System - Docker Compose
+# ==========================================
+# Complete stack: Frontend, Backend, MongoDB
+#
+# Usage:
+#   docker-compose up              # Start all services
+#   docker-compose down            # Stop all services
+#   docker-compose logs -f         # View live logs
+#   docker-compose build           # Rebuild images
+#
+# Access:
+#   Frontend: http://localhost
+#   Backend:  http://localhost:5000
+#   API:      http://localhost:5000/api/students
+
+services:
+  # ==========================================
+  # Frontend - React + Vite + Nginx
+  # ==========================================
+  frontend:
+    build:
+      context: ./student-management-frontend
+      dockerfile: frontend.Dockerfile
+    container_name: student-mgmt-frontend
+    ports:
+      - "80:80"
+    environment:
+      # Build-time environment variables
+      - VITE_API_BASE_URL=http://localhost:5000/api/students
+    depends_on:
+      - backend
+    networks:
+      - student-network
+    restart: unless-stopped
+    # Add volume for development hot-reload (optional)
+    volumes:
+      - ./student-management-frontend/src:/app/src:ro
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost/"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+
+  # ==========================================
+  # Backend - Node.js + Express
+  # ==========================================
+  backend:
+    build:
+      context: .
+      dockerfile: backend.Dockerfile
+    container_name: student-mgmt-backend
+    ports:
+      - "5000:5000"
+    environment:
+      # Server config
+      - NODE_ENV=production
+      - PORT=5000
+      - FRONTEND_URL=http://localhost
+
+      # Database
+      - MONGO_URI=mongodb://mongodb:27017/student-db
+
+      # JWT
+      - JWT_SECRET=${JWT_SECRET:-dev-secret-change-in-production}
+
+      # Cloudinary - Get from .env file
+      - CLOUDINARY_CLOUD_NAME=${CLOUDINARY_CLOUD_NAME}
+      - CLOUDINARY_API_KEY=${CLOUDINARY_API_KEY}
+      - CLOUDINARY_API_SECRET=${CLOUDINARY_API_SECRET}
+
+      # Upload retry config
+      - UPLOAD_MAX_RETRIES=3
+      - UPLOAD_BASE_DELAY=1000
+
+      # Socket.IO CORS
+      - SOCKET_CORS_ORIGIN=http://localhost,http://localhost:5000,http://localhost:80,http://frontend
+
+      # Logging
+      - LOG_LEVEL=INFO
+    depends_on:
+      mongodb:
+        condition: service_healthy
+    networks:
+      - student-network
+    restart: unless-stopped
+    # Volume for logs (optional)
+    volumes:
+      - ./logs:/app/logs
+    healthcheck:
+      test: ["CMD", "node", "-e", "require('http').get('http://localhost:5000/health', (r) => {if (r.statusCode !== 200) throw new Error(r.statusCode)})"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+
+  # ==========================================
+  # MongoDB Database
+  # ==========================================
+  mongodb:
+    image: mongo:7-alpine
+    container_name: student-mgmt-mongodb
+    ports:
+      - "27017:27017"
+    environment:
+      # Optional: Add authentication (for production)
+      # MONGO_INITDB_ROOT_USERNAME: admin
+      # MONGO_INITDB_ROOT_PASSWORD: password
+      MONGO_INITDB_DATABASE: student-db
+    networks:
+      - student-network
+    restart: unless-stopped
+    volumes:
+      # Persist database data
+      - mongodb_data:/data/db
+      - mongodb_config:/data/configdb
+    healthcheck:
+      test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+
+# ==========================================
+# Networks
+# ==========================================
+networks:
+  student-network:
+    driver: bridge
+
+# ==========================================
+# Volumes
+# ==========================================
+volumes:
+  mongodb_data:
+    driver: local
+  mongodb_config:
+    driver: local
+
+
+  

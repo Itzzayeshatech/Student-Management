@@ -4,6 +4,7 @@ export default function StudentTable({ students, onDelete }) {
       <table className="w-full text-left border-collapse">
         <thead>
           <tr className="bg-slate-50 border-b border-slate-200">
+            <th className="px-6 py-4 font-semibold text-slate-700">Image</th>
             <th className="px-6 py-4 font-semibold text-slate-700">Name</th>
             <th className="px-6 py-4 font-semibold text-slate-700">Age</th>
             <th className="px-6 py-4 font-semibold text-slate-700">Course</th>
@@ -13,6 +14,15 @@ export default function StudentTable({ students, onDelete }) {
         <tbody className="divide-y divide-slate-100">
           {students.map((s) => (
             <tr key={s._id} className="hover:bg-indigo-50/30 transition-colors group">
+              <td className="px-6 py-4">
+                {s.image ? (
+                  <img src={s.image} alt={s.name} className="w-12 h-12 object-cover rounded-full" />
+                ) : (
+                  <div className="w-12 h-12 bg-slate-200 rounded-full flex items-center justify-center">
+                    <span className="text-slate-500 text-sm">No Image</span>
+                  </div>
+                )}
+              </td>
               <td className="px-6 py-4 font-medium text-slate-900">{s.name}</td>
               <td className="px-6 py-4 text-slate-600">{s.age}</td>
               <td className="px-6 py-4">

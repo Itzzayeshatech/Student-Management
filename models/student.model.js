@@ -11,13 +11,21 @@ const studentSchema = new mongoose.Schema(
     age: {
       type: Number,
       required: [true, 'Age is required'],
-      min: [5, 'Age must be at least 5'],
+      min: [0, 'Age cannot be negative'],
       max: [100, 'Age must be realistic']
     },
     course: {
       type: String,
       required: [true, 'Course is required'],
       trim: true
+    },
+    imageUrl: {
+      type: String,
+      default: ""
+    },
+    image: {
+      type: String, // Cloudinary URL
+      default: null
     }
   },
   {

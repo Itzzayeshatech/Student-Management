@@ -1,12 +1,13 @@
 const express = require('express');
 const router = express.Router();
-const controller = require('../controllers/student.controller');
+const studentController = require('../controllers/student.controller');
+const { upload } = require('../config/cloudinary');
 const validate = require('../middlewares/validation.middleware');
 
-router.post('/', validate, controller.createStudent);
-router.get('/', controller.getAllStudents);
-router.get('/:id', controller.getStudentById);
-router.put('/:id', validate, controller.updateStudent);
-router.delete('/:id', controller.deleteStudent);
+router.get('/', studentController.getAllStudents);
+router.get('/:id', studentController.getStudentById);
+router.post('/', upload.single('image'), validate, studentController.createStudent);
+router.put('/:id', upload.single('image'), validate, studentController.updateStudent);
+router.delete('/:id', studentController.deleteStudent);
 
 module.exports = router;
