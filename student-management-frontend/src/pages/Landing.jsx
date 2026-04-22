@@ -1,6 +1,6 @@
 import Button from "../components/Button";
 
-export default function Landing() {
+export default function Landing({ onStart }) {
   return (
     <main className="min-h-[80vh] flex flex-col items-center justify-center text-center px-6">
       <div className="max-w-3xl">
@@ -12,8 +12,8 @@ export default function Landing() {
         </p>
 
         <section className="mt-10 flex flex-col sm:flex-row gap-4 justify-center">
-          <Button text="View Dashboard" />
-          <Button text="Add New Student" variant="outline" />
+          <Button onClick={onStart} text="View Dashboard" />
+          <Button onClick={onStart} text="Add New Student" variant="outline" />
         </section>
       </div>
 
