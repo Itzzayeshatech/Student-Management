@@ -72,13 +72,21 @@ export default function StudentForm({ onSuccess }) {
         </div>
         <div>
           <label className="block text-sm font-semibold text-slate-700 mb-1">Course</label>
-          <input 
+          <select 
             name="course" 
-            placeholder="e.g. Computer Science" 
+            value={form.course}
             onChange={handleChange} 
             required
-            className="w-full border border-slate-200 rounded-xl p-3 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition-all" 
-          />
+            className="w-full border border-slate-200 rounded-xl p-3 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition-all bg-white" 
+          >
+            <option value="" disabled>Select a course</option>
+            <option value="Computer Science">Computer Science</option>
+            <option value="Engineering">Engineering</option>
+            <option value="Business">Business</option>
+            <option value="Medicine">Medicine</option>
+            <option value="Arts">Arts</option>
+            <option value="Science">Science</option>
+          </select>
         </div>
         <div>
           <label className="block text-sm font-semibold text-slate-700 mb-1">Profile Image</label>

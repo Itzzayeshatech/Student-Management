@@ -96,6 +96,9 @@ export const useStudents = () => {
    * Setup WebSocket listeners and fetch initial data
    */
   useEffect(() => {
+    // Reset mounted flag for React 18 StrictMode double-mounts
+    mountedRef.current = true;
+
     // Initial fetch
     refreshStudents();
 
