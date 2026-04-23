@@ -53,6 +53,22 @@ app.get('/health', (req, res) => {
 app.use('/api/auth', authRoutes);
 app.use('/api/students', protect, studentRoutes);
 
+// Root route so visiting localhost:5000 doesn't throw a 404
+app.get('/', (req, res) => {
+  res.status(200).send(`
+    <html>
+      <body style="font-family: Arial, sans-serif; padding: 2rem; text-align: center; background-color: #f8fafc;">
+        <h1 style="color: #4f46e5;">Backend API is Running! 🚀</h1>
+        <p style="color: #64748b; font-size: 1.2rem;">You have accessed the API server successfully.</p>
+        <p style="color: #334155; margin-top: 2rem; padding: 1rem; background: #e2e8f0; border-radius: 8px; display: inline-block;">
+          <strong>Note:</strong> To view the actual Student Dashboard, please open the frontend application at: <br/>
+          <a href="http://localhost:5173" style="color: #2563eb; font-weight: bold; font-size: 1.3rem;">http://localhost:5173</a>
+        </p>
+      </body>
+    </html>
+  `);
+});
+
 // 404
 app.use(notFound);
 
